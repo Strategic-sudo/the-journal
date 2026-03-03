@@ -1,3 +1,8 @@
 name = "the-journal"
 main = "src/index.js"
 compatibility_date = "2026-03-03"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "the-journal"
+database_id = "1fb09a06-2b51-464d-9328-77a890b53fe3"
