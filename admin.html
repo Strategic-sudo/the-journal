@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard - The Journal</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Mono&family=Crimson+Pro&display=swap" rel="stylesheet">
+<style>
+body {
+  background:#0a0a0a;
+  color:#e8e0d0;
+  font-family:'Crimson Pro',serif;
+  padding:2rem;
+}
+h1 {
+  font-family:'Playfair Display',serif;
+  margin-bottom:2rem;
+}
+input, textarea, select {
+  width:100%;
+  margin-bottom:1rem;
+  padding:.6rem;
+  background:#111;
+  border:1px solid #333;
+  color:white;
+}
+button {
+  padding:.7rem 1.5rem;
+  background:#c0392b;
+  border:none;
+  color:white;
+  cursor:pointer;
+  margin-right:.5rem;
+}
+.post {
+  border-bottom:1px solid #333;
+  padding:1rem 0;
+}
+.small {
+  font-size:.8rem;
+  color:#aaa;
+}
+</style>
+</head>
+<body>
+
+<script>
+if(sessionStorage.getItem("blog_auth") !== "true"){
+  window.location.href = "login.html";
+}
+</script>
+
+<h1>Admin Dashboard</h1>
+
+<button onclick="logout()">Logout</button>
+
+<h2>Create Post</h2>
+<input type="text" id="title" placeholder="Post title">
+<select id="category"></select>
+<textarea id="body" rows="8" placeholder="Write HTML content here..."></textarea>
+<button onclick="createPost()">Publish</button>
+
+<h2>Posts</h2>
+<div id="posts"></div>
+
+<script>
+const getBlogs = () => JSON.parse(localStorage.getItem('blog_posts') || '[]');
+const saveBlogs = posts => localStorage.setItem('blog_posts', JSON.stringify(posts));
+const getCats = () => JSON.parse(localStorage.getItem('blog_categories') || '["General","Technology","Life","Travel"]');
+
+function logout(){
+  sessionStorage.removeItem("blog_auth");
+  window.location.href="index.html";
+}
+
+function renderCategories(){
+  const select = document.getElementById("category");
+  select.innerHTML="";
+  getCats().forEach(c=>{
+    select.innerHTML += `<option value="${c}">${c}</option>`;
+  });
+}
+
+function createPost(){
+  const title = document.getElementById("title").value;
+  const body = document.getElementById("body").value;
+  const category = document.getElementById("category").value;
+
+  if(!title || !body) return;
+
+  const posts = getBlogs();
+  posts.push({
+    id: crypto.randomUUID(),
+    title,
+    body,
+    category,
+    date: new Date().toISOString()
+  });
+
+  saveBlogs(posts);
+  document.getElementById("title").value="";
+  document.getElementById("body").value="";
+  renderPosts();
+}
+
+function deletePost(id){
+  let posts = getBlogs();
+  posts = posts.filter(p=>p.id!==id);
+  saveBlogs(posts);
+  renderPosts();
+}
+
+function renderPosts(){
+  const posts = getBlogs().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const container = document.getElementById("posts");
+  container.innerHTML = posts.map(p=>`
+    <div class="post">
+      <strong>${p.title}</strong>
+      <div class="small">${new Date(p.date).toLocaleString()}</div>
+      <button onclick="deletePost('${p.id}')">Delete</button>
+    </div>
+  `).join('');
+}
+
+renderCategories();
+renderPosts();
+</script>
+
+</body>
+</html>
