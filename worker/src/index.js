@@ -33,7 +33,7 @@ app.get('/', (c) => c.text('Hono!'));
 
 
 
-
+//create post
 app.post("/api/posts", async (c) => {
   const { author, title, content } = await c.req.json();
 
@@ -55,7 +55,7 @@ app.post("/api/posts", async (c) => {
 
 
 
-
+//read all posts
 app.get("/api/posts", async (c) => {
   const { results } = await c.env.DB.prepare(
     `SELECT * FROM posts ORDER BY id DESC`
@@ -67,7 +67,7 @@ app.get("/api/posts", async (c) => {
 
 
 
-
+//delete post
 app.delete("/api/posts/:id", async (c) => {
   const { id } = c.req.param();
 
@@ -88,7 +88,7 @@ app.delete("/api/posts/:id", async (c) => {
 
 
 
-
+//upload comment
 app.post("/api/posts/:id/comments", async (c) => {
   const { id } = c.req.param();
   const { name, content } = await c.req.json();
@@ -114,7 +114,7 @@ app.post("/api/posts/:id/comments", async (c) => {
 
 
 
-
+//read comment
 app.get("/api/posts/:id/comments", async (c) => {
   const { id } = c.req.param();
 
@@ -126,5 +126,5 @@ app.get("/api/posts/:id/comments", async (c) => {
 
   return c.json(results);
 });
-
+// ΤΑ ΠΡΑΓΜΑΤΑ ΓΕΝΙΚΟΤΕΡΑ ΓΙΝΟΝΤΑΙ ΜΕ POST ΚΑΙ GET Ή DELETE HTTP REQUESTS, ΟΠΩΣ ΤΑ COMMENTS ΚΑΙ ΤΟ DELETE, ΟΠΟΤΕ ΜΠΟΡΕΙΣ ΣΤΕΙΛΕ ΜΟΥ ΜΥΝΗΜΑ ΝΑ ΚΑΝΩ ΤΟ SCRIPT ΛΙΓΟ ΠΙΟ ΟΜΟΡΦΟ. ΚΑΛΗΜΕΡΑ.
 export default app
