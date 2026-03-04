@@ -1,10 +1,7 @@
 import { Hono } from 'hono'
 const app = new Hono()
 
-
-
-
-//sha 256
+// sha-256
 async function hashPassword(password) {
   const encoder = new TextEncoder()
   const data = encoder.encode(password)
@@ -17,12 +14,9 @@ async function hashPassword(password) {
 
 
 
-
-//auth
+// authentication for th e  middleware
 async function authMiddleware(c, next) {
-
   const authHeader = c.req.header("Authorization")
-
   if (!authHeader || !authHeader.startsWith("Basic ")) {
     return c.json({ error: "Unauthorized" }, 401)
   }
@@ -31,10 +25,7 @@ async function authMiddleware(c, next) {
     const base64 = authHeader.split(" ")[1]
     const decoded = atob(base64)
     const [username, password] = decoded.split(":")
-
-    if (!username || !password) {
-      return c.json({ error: "Invalid credentials format" }, 400)
-    }
+    if (!username || !password) return c.json({ error: "Invalid credentials format" }, 400)
 
     const { results } = await c.env.DB.prepare(
       `SELECT id, password FROM auth WHERE username = ?`
@@ -42,22 +33,15 @@ async function authMiddleware(c, next) {
       .bind(username)
       .all()
 
-    if (!results || results.length === 0) {
-      return c.json({ error: "Forbidden" }, 403)
-    }
+    if (!results || results.length === 0) return c.json({ error: "Forbidden" }, 403)
 
     const user = results[0]
-
     const hashedInput = await hashPassword(password)
 
-    if (hashedInput !== user.password) {
-      return c.json({ error: "Forbidden" }, 403)
-    }
+    if (hashedInput !== user.password) return c.json({ error: "Forbidden" }, 403)
 
     c.set("userId", user.id)
-
     await next()
-
   } catch (err) {
     return c.json({ error: "Authentication error" }, 500)
   }
@@ -65,30 +49,30 @@ async function authMiddleware(c, next) {
 
 
 
-
-
-
-
-
-// for the routes
+// base route
 app.get('/', (c) => c.text('Hono Secure Blog API'))
 
 
 
 
-
-
-
-// read a post
+// read a single post
 app.get("/api/posts/:slug", async (c) => {
   const { slug } = c.req.param()
-
   const { results } = await c.env.DB.prepare(
     `SELECT * FROM posts WHERE id = ?`
-  )
-    .bind(slug)
-    .all()
+  ).bind(slug).all()
+  return c.json(results)
+})
 
+
+
+
+
+// dead all posts
+app.get("/api/posts", async (c) => {
+  const { results } = await c.env.DB.prepare(
+    `SELECT * FROM posts ORDER BY id DESC`
+  ).all()
   return c.json(results)
 })
 
@@ -99,24 +83,16 @@ app.get("/api/posts/:slug", async (c) => {
 
 // create post (protected)
 app.post("/api/posts", authMiddleware, async (c) => {
-
   const userId = c.get("userId")
   const { title, content } = await c.req.json()
 
-  if (!title || !content) {
-    return c.json({ error: "Missing fields" }, 400)
-  }
+  if (!title || !content) return c.json({ error: "Missing fields" }, 400)
 
   const { success } = await c.env.DB.prepare(
-    `INSERT INTO posts (author, title, content)
-     VALUES (?, ?, ?)`
-  )
-    .bind(userId, title, content)
-    .run()
+    `INSERT INTO posts (author, title, content) VALUES (?, ?, ?)`
+  ).bind(userId, title, content).run()
 
-  if (!success) {
-    return c.json({ error: "Failed to create post" }, 500)
-  }
+  if (!success) return c.json({ error: "Failed to create post" }, 500)
 
   return c.json({ message: "Post created successfully" })
 })
@@ -127,38 +103,16 @@ app.post("/api/posts", authMiddleware, async (c) => {
 
 
 
-
-// read all posts
-app.get("/api/posts", async (c) => {
-  const { results } = await c.env.DB.prepare(
-    `SELECT * FROM posts ORDER BY id DESC`
-  ).all()
-
-  return c.json(results)
-})
-
-
-
-
-
-
-
-
-// delete (admin only)
+// delete post (protected)
 app.delete("/api/posts/:id", authMiddleware, async (c) => {
-
   const userId = c.get("userId")
   const { id } = c.req.param()
 
   const { success } = await c.env.DB.prepare(
     `DELETE FROM posts WHERE id = ? AND author = ?`
-  )
-    .bind(id, userId)
-    .run()
+  ).bind(id, userId).run()
 
-  if (!success) {
-    return c.json({ error: "Delete failed or not owner" }, 403)
-  }
+  if (!success) return c.json({ error: "Delete failed or not owner" }, 403)
 
   return c.json({ message: "Post deleted" })
 })
@@ -171,26 +125,16 @@ app.delete("/api/posts/:id", authMiddleware, async (c) => {
 
 // add comment
 app.post("/api/posts/:id/comments", async (c) => {
-
   const { id } = c.req.param()
   const { name, content } = await c.req.json()
-
-  if (!name || !content) {
-    return c.json({ error: "Missing fields" }, 400)
-  }
+  if (!name || !content) return c.json({ error: "Missing fields" }, 400)
 
   const date = new Date().toISOString()
-
   const { success } = await c.env.DB.prepare(
-    `INSERT INTO comments (post_id, date, name, content)
-     VALUES (?, ?, ?, ?)`
-  )
-    .bind(id, date, name, content)
-    .run()
+    `INSERT INTO comments (post_id, date, name, content) VALUES (?, ?, ?, ?)`
+  ).bind(id, date, name, content).run()
 
-  if (!success) {
-    return c.json({ error: "Failed to add comment" }, 500)
-  }
+  if (!success) return c.json({ error: "Failed to add comment" }, 500)
 
   return c.json({ message: "Comment added" })
 })
@@ -202,49 +146,11 @@ app.post("/api/posts/:id/comments", async (c) => {
 
 // read comments
 app.get("/api/posts/:id/comments", async (c) => {
-
   const { id } = c.req.param()
-
   const { results } = await c.env.DB.prepare(
     `SELECT * FROM comments WHERE post_id = ? ORDER BY date DESC`
-  )
-    .bind(id)
-    .all()
-
+  ).bind(id).all()
   return c.json(results)
-})
-
-
-//temporary debug
-app.get("/debug/hash/:pass", async (c) => {
-  const { pass } = c.req.param()
-
-  const encoder = new TextEncoder()
-  const data = encoder.encode(pass)
-  const hash = await crypto.subtle.digest("SHA-256", data)
-  const hex = Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("")
-
-  return c.json({ hash: hex })
-})
-
-//again
-app.get("/debug/create-admin", async (c) => {
-  const hashed = await hashPassword("1234")
-
-  await c.env.DB.prepare(
-    `INSERT INTO auth (username, password)
-     VALUES (?, ?)`
-  )
-    .bind("admin", hashed)
-    .run()
-
-  return c.json({
-    message: "Admin created",
-    hash: hashed,
-    length: hashed.length
-  })
 })
 
 export default app
