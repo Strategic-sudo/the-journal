@@ -214,4 +214,19 @@ app.get("/api/posts/:id/comments", async (c) => {
   return c.json(results)
 })
 
+
+//temporary debug
+app.get("/debug/hash/:pass", async (c) => {
+  const { pass } = c.req.param()
+
+  const encoder = new TextEncoder()
+  const data = encoder.encode(pass)
+  const hash = await crypto.subtle.digest("SHA-256", data)
+  const hex = Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
+
+  return c.json({ hash: hex })
+})
+
 export default app
