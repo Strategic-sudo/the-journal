@@ -55,7 +55,7 @@ app.get('/', (c) => c.text('Hono Secure Blog API'))
 
 
 
-// read a single post
+// read a post
 app.get("/api/posts/:slug", async (c) => {
   const { slug } = c.req.param()
   const { results } = await c.env.DB.prepare(
@@ -68,7 +68,7 @@ app.get("/api/posts/:slug", async (c) => {
 
 
 
-// dead all posts
+// read all posts
 app.get("/api/posts", async (c) => {
   const { results } = await c.env.DB.prepare(
     `SELECT * FROM posts ORDER BY id DESC`
