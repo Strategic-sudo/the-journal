@@ -229,4 +229,22 @@ app.get("/debug/hash/:pass", async (c) => {
   return c.json({ hash: hex })
 })
 
+//again
+app.get("/debug/create-admin", async (c) => {
+  const hashed = await hashPassword("1234")
+
+  await c.env.DB.prepare(
+    `INSERT INTO auth (username, password)
+     VALUES (?, ?)`
+  )
+    .bind("admin", hashed)
+    .run()
+
+  return c.json({
+    message: "Admin created",
+    hash: hashed,
+    length: hashed.length
+  })
+})
+
 export default app
