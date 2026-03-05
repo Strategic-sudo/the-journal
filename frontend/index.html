@@ -1,119 +1,375 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-<title>Journal</title>
-
-<style>
-
-body{
-background:#0f0f0f;
-color:white;
-font-family:system-ui;
-margin:0;
-overflow-x:hidden;
-}
-
-header{
-text-align:center;
-padding:60px;
-font-size:40px;
-letter-spacing:3px;
-}
-
-#posts{
-max-width:900px;
-margin:auto;
-}
-
-.post{
-background:#1b1b1b;
-padding:30px;
-margin:30px;
-border-radius:12px;
-opacity:0;
-transform:translateY(50px);
-transition:0.3s;
-}
-
-.post:hover{
-transform:scale(1.02);
-background:#242424;
-}
-
-.title{
-font-size:28px;
-margin-bottom:10px;
-}
-
-.content{
-opacity:0.85;
-line-height:1.6;
-}
-
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/gsap@3"></script>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JOURNAL — Cinematic Blog Portal</title>
+  <link rel="stylesheet" href="style.css" />
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+  
+  <script>
+    window.addEventListener("DOMContentLoaded", function () {
+      if (window.gsap && window.MotionPathPlugin) {
+        gsap.registerPlugin(MotionPathPlugin);
+        console.info("[JOURNAL] MotionPathPlugin registered via HTML guard");
+      } else {
+        console.warn("[JOURNAL] MotionPathPlugin unavailable — waypoint fallback active");
+      }
+    });
+  </script>
+ 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet" />
 </head>
-
 <body>
 
-<header id="title">The Journal</header>
+  
+  <canvas id="bg-canvas"></canvas>
 
-<div id="posts"></div>
+  
+  <section id="scene-intro" class="scene active">
+    <canvas id="particle-canvas"></canvas>
+    <div class="intro-content">
+      <div class="scanline-overlay"></div>
+      <div class="intro-pre-text">INITIALIZING SIGNAL STREAM</div>
+      <h1 id="main-title" class="glitch-title" data-text="JOURNAL">JOURNAL</h1>
+      <div class="intro-sub-text">CLICK TO TRANSMIT</div>
+      <div class="pulse-ring"></div>
+      <div class="pulse-ring delay1"></div>
+      <div class="pulse-ring delay2"></div>
+    </div>
+  </section>
 
-<script>
+  
+  <section id="scene-circuit" class="scene">
+    <div class="circuit-label">SIGNAL ROUTING — PACKET TRACE</div>
+    <svg id="circuit-svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid meet">
+      
+      <defs>
+        <filter id="glow-green">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-orange">
+          <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="spark-blur">
+          <feGaussianBlur stdDeviation="2"/>
+        </filter>
+        <radialGradient id="electron-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="40%" stop-color="#00ffff"/>
+          <stop offset="100%" stop-color="#0088ff" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="wire-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#1a3a1a"/>
+          <stop offset="50%" stop-color="#2a6a2a"/>
+          <stop offset="100%" stop-color="#1a3a1a"/>
+        </linearGradient>
+      </defs>
 
-async function loadPosts(){
+      
+      <g id="pcb-grid" opacity="0.15">
+        <line x1="0" y1="100" x2="1200" y2="100" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="0" y1="200" x2="1200" y2="200" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="0" y1="300" x2="1200" y2="300" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="0" y1="400" x2="1200" y2="400" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="0" y1="500" x2="1200" y2="500" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="0" y1="600" x2="1200" y2="600" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="100" y1="0" x2="100" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="200" y1="0" x2="200" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="300" y1="0" x2="300" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="400" y1="0" x2="400" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="500" y1="0" x2="500" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="600" y1="0" x2="600" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="700" y1="0" x2="700" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="800" y1="0" x2="800" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="900" y1="0" x2="900" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="1000" y1="0" x2="1000" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+        <line x1="1100" y1="0" x2="1100" y2="700" stroke="#00ff44" stroke-width="0.5"/>
+      </g>
 
-const res = await fetch("/api/posts")
-const posts = await res.json()
+      
+      <g id="solder-pads" fill="none" stroke="#b87333" stroke-width="1.5" opacity="0.6">
+        <circle cx="80"  cy="350" r="8"/>
+        <circle cx="80"  cy="350" r="5" fill="#b87333"/>
+        <circle cx="300" cy="200" r="8"/>
+        <circle cx="300" cy="200" r="5" fill="#b87333"/>
+        <circle cx="500" cy="450" r="8"/>
+        <circle cx="500" cy="450" r="5" fill="#b87333"/>
+        <circle cx="700" cy="250" r="8"/>
+        <circle cx="700" cy="250" r="5" fill="#b87333"/>
+        <circle cx="900" cy="500" r="8"/>
+        <circle cx="900" cy="500" r="5" fill="#b87333"/>
+        <circle cx="1100" cy="350" r="8"/>
+        <circle cx="1100" cy="350" r="5" fill="#b87333"/>
+      </g>
 
-const container = document.getElementById("posts")
+      
+      <g id="components" opacity="0.7">
+       
+        <rect x="275" y="190" width="50" height="20" rx="3" fill="none" stroke="#b87333" stroke-width="1.5"/>
+        <line x1="275" y1="200" x2="260" y2="200" stroke="#b87333" stroke-width="1.5"/>
+        <line x1="325" y1="200" x2="340" y2="200" stroke="#b87333" stroke-width="1.5"/>
+        <line x1="290" y1="190" x2="290" y2="210" stroke="#cc8833" stroke-width="1"/>
+        <line x1="300" y1="190" x2="300" y2="210" stroke="#cc4400" stroke-width="1"/>
+        <line x1="310" y1="190" x2="310" y2="210" stroke="#cc8833" stroke-width="1"/>
+        
+        <line x1="690" y1="235" x2="690" y2="265" stroke="#b87333" stroke-width="2"/>
+        <line x1="710" y1="235" x2="710" y2="265" stroke="#b87333" stroke-width="2"/>
+        <line x1="670" y1="250" x2="690" y2="250" stroke="#b87333" stroke-width="1.5"/>
+        <line x1="710" y1="250" x2="730" y2="250" stroke="#b87333" stroke-width="1.5"/>
+        
+        <rect x="860" y="475" width="80" height="50" rx="2" fill="#1a1a2e" stroke="#00ff44" stroke-width="1"/>
+        <line x1="870" y1="485" x2="860" y2="485" stroke="#00ff44" stroke-width="1"/>
+        <line x1="870" y1="495" x2="860" y2="495" stroke="#00ff44" stroke-width="1"/>
+        <line x1="870" y1="505" x2="860" y2="505" stroke="#00ff44" stroke-width="1"/>
+        <line x1="870" y1="515" x2="860" y2="515" stroke="#00ff44" stroke-width="1"/>
+        <line x1="930" y1="485" x2="940" y2="485" stroke="#00ff44" stroke-width="1"/>
+        <line x1="930" y1="495" x2="940" y2="495" stroke="#00ff44" stroke-width="1"/>
+        <line x1="930" y1="505" x2="940" y2="505" stroke="#00ff44" stroke-width="1"/>
+        <line x1="930" y1="515" x2="940" y2="515" stroke="#00ff44" stroke-width="1"/>
+        <text x="900" y="502" text-anchor="middle" fill="#00ff44" font-size="8" font-family="Share Tech Mono">CPU</text>
+      </g>
 
-container.innerHTML=""
+      
+      <path id="wire-path-shadow"
+        d="M 60,350
+           L 80,350
+           L 80,200 L 300,200
+           L 300,180 L 300,200
+           L 500,200 L 500,450
+           L 700,450 L 700,250
+           L 900,250 L 900,500
+           L 1100,500 L 1100,350
+           L 1140,350"
+        fill="none" stroke="#8B4513" stroke-width="6" opacity="0.4" stroke-linecap="round" stroke-linejoin="round"/>
 
-posts.forEach(p=>{
+      <path id="wire-path"
+        d="M 60,350
+           L 80,350
+           L 80,200 L 300,200
+           L 300,180 L 300,200
+           L 500,200 L 500,450
+           L 700,450 L 700,250
+           L 900,250 L 900,500
+           L 1100,500 L 1100,350
+           L 1140,350"
+        fill="none" stroke="#b87333" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"
+        filter="url(#glow-orange)"/>
 
-const div=document.createElement("div")
+      
+      <path id="current-pulse"
+        d="M 60,350
+           L 80,350
+           L 80,200 L 300,200
+           L 500,200 L 500,450
+           L 700,450 L 700,250
+           L 900,250 L 900,500
+           L 1100,500 L 1100,350
+           L 1140,350"
+        fill="none" stroke="#00ffaa" stroke-width="2" opacity="0"
+        stroke-linecap="round" stroke-linejoin="round"/>
 
-div.className="post"
+      
+      <g id="electron-group">
+        <circle id="electron-glow2" r="20" fill="url(#electron-grad)" opacity="0.4"/>
+        <circle id="electron-glow" r="12" fill="#00ffff" opacity="0.3" filter="url(#spark-blur)"/>
+        <circle id="electron-core" r="5" fill="#ffffff"/>
+        <circle id="electron-inner" r="2.5" fill="#00ffff"/>
+      </g>
 
-div.innerHTML=`
-<div class="title">${p.title}</div>
-<div class="content">${p.content}</div>
-`
+      
+      <g id="sparks-group"></g>
 
-container.appendChild(div)
+      
+      <g id="pulse-rings-group"></g>
 
-})
+      
+      <g id="server-marker" opacity="0" transform="translate(1140,350)">
+        <rect x="-25" y="-40" width="50" height="80" rx="3" fill="#0a0a1e" stroke="#00ff44" stroke-width="1.5"/>
+        <rect x="-20" y="-35" width="40" height="8" rx="1" fill="none" stroke="#00ff44" stroke-width="1"/>
+        <rect x="-20" y="-22" width="40" height="8" rx="1" fill="none" stroke="#00ff44" stroke-width="1"/>
+        <rect x="-20" y="-9" width="40" height="8" rx="1" fill="none" stroke="#00ff44" stroke-width="1"/>
+        <rect x="-20" y="4" width="40" height="8" rx="1" fill="none" stroke="#00ff44" stroke-width="1"/>
+        <circle cx="-12" cy="-31" r="2" fill="#00ff44" class="server-led"/>
+        <circle cx="-12" cy="-18" r="2" fill="#ff4400" class="server-led"/>
+        <circle cx="-12" cy="-5" r="2" fill="#00ff44" class="server-led"/>
+        <circle cx="-12" cy="8" r="2" fill="#ffaa00" class="server-led"/>
+        <text x="0" y="52" text-anchor="middle" fill="#00ff44" font-size="8" font-family="Share Tech Mono">SERVER</text>
+      </g>
 
-animatePosts()
+    </svg>
+    
+    <canvas id="spark-canvas"></canvas>
+  </section>
 
-}
+  
+  <section id="scene-server" class="scene">
+    <canvas id="server-canvas"></canvas>
+    <div class="server-ui">
+      <div class="server-header">
+        <span class="server-id">SRV-NODE-∆447</span>
+        <span class="server-status">● PROCESSING</span>
+      </div>
+      <div class="server-rack-container">
+        
+        <div class="rack-unit" id="rack-0"><div class="rack-led on"></div><div class="rack-label">STORAGE ARRAY</div><div class="rack-activity"></div></div>
+        <div class="rack-unit" id="rack-1"><div class="rack-led pulse"></div><div class="rack-label">FIBER UPLINK</div><div class="rack-activity"></div></div>
+        <div class="rack-unit active" id="rack-2"><div class="rack-led flash"></div><div class="rack-label">CPU CLUSTER ◀ SIGNAL INCOMING</div><div class="rack-activity"></div></div>
+        <div class="rack-unit" id="rack-3"><div class="rack-led on"></div><div class="rack-label">MEMORY BANK</div><div class="rack-activity"></div></div>
+        <div class="rack-unit" id="rack-4"><div class="rack-led pulse"></div><div class="rack-label">NETWORK SWITCH</div><div class="rack-activity"></div></div>
+        <div class="rack-unit" id="rack-5"><div class="rack-led on"></div><div class="rack-label">POWER SUPPLY</div><div class="rack-activity"></div></div>
+      </div>
+      <div class="fiber-lines-container">
+        <svg id="fiber-svg" viewBox="0 0 800 200">
+          
+          <defs>
+            <linearGradient id="fiber-red" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#ff000000"/>
+              <stop offset="50%" stop-color="#ff4400"/>
+              <stop offset="100%" stop-color="#ff000000"/>
+            </linearGradient>
+            <linearGradient id="fiber-blue" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0000ff00"/>
+              <stop offset="50%" stop-color="#0088ff"/>
+              <stop offset="100%" stop-color="#0000ff00"/>
+            </linearGradient>
+          </defs>
+          <line class="fiber-line" x1="0" y1="40" x2="800" y2="40" stroke="#ff440033" stroke-width="2"/>
+          <line class="fiber-line" x1="0" y1="70" x2="800" y2="70" stroke="#0088ff33" stroke-width="2"/>
+          <line class="fiber-line" x1="0" y1="100" x2="800" y2="100" stroke="#00ff4433" stroke-width="2"/>
+          <line class="fiber-line" x1="0" y1="130" x2="800" y2="130" stroke="#ff440033" stroke-width="2"/>
+          <line class="fiber-line" x1="0" y1="160" x2="800" y2="160" stroke="#0088ff33" stroke-width="2"/>
+          
+          <g id="fiber-pulses"></g>
+        </svg>
+      </div>
+      <div class="server-readout">
+        <div id="server-log"></div>
+      </div>
+    </div>
+  </section>
 
-function animatePosts(){
+  
+  <section id="scene-explosion" class="scene">
+    <canvas id="explosion-canvas"></canvas>
+    <div class="stream-labels">
+      <div id="red-stream-label" class="stream-label red">RED STREAM<br/><span>SOCIETY · ECONOMICS · GEOPOLITICS</span></div>
+      <div id="blue-stream-label" class="stream-label blue">BLUE STREAM<br/><span>HACKING · CYBERSECURITY</span></div>
+    </div>
+  </section>
 
-gsap.from("#title",{
-y:-40,
-opacity:0,
-duration:1.2
-})
+  
+  <section id="scene-portal" class="scene">
+   
+    <nav id="main-nav">
+      <div class="nav-logo">◈ JOURNAL</div>
+      <div class="nav-links">
+        <a href="#" class="nav-link active" data-filter="all">ALL SIGNALS</a>
+        <a href="#" class="nav-link red-link" data-filter="red">SOCIETY</a>
+        <a href="#" class="nav-link blue-link" data-filter="blue">SECURITY</a>
+      </div>
+      <div class="nav-status">
+        <span class="live-dot"></span> LIVE FEED
+      </div>
+    </nav>
 
-gsap.to(".post",{
-opacity:1,
-y:0,
-stagger:0.15,
-duration:1,
-ease:"power3.out"
-})
+    
+    <div id="portal-container">
 
-}
+      
+      <div id="red-portal" class="portal-panel red-panel">
+        <canvas class="portal-canvas" id="red-canvas"></canvas>
+       
+        <div class="portal-overlay red-overlay"></div>
+        <div class="panel-header">
+          <div class="panel-icon">◉</div>
+          <div class="panel-title-group">
+            <h2 class="panel-title">SOCIETY</h2>
+            <div class="panel-subtitle">Economics · Geopolitics · World Affairs</div>
+          </div>
+          <div class="panel-stats">
+            <div class="stat"><span id="red-count">0</span><small>ARTICLES</small></div>
+          </div>
+        </div>
+        
+        <div class="graph-decoration">
+          <svg id="finance-graph" viewBox="0 0 400 80" preserveAspectRatio="none">
+            <polyline id="graph-line" points="" fill="none" stroke="#ff4400" stroke-width="1.5" opacity="0.6"/>
+            <polygon id="graph-fill" points="" fill="#ff440015"/>
+          </svg>
+        </div>
+        
+        <div class="cards-container" id="red-cards"></div>
+        <div class="panel-footer red-footer">
+          <div class="footer-grid-lines"></div>
+        </div>
+      </div>
 
-loadPosts()
+      
+      <div id="center-divider">
+        <div class="divider-line"></div>
+        <div class="divider-core">
+          <div class="divider-symbol">⚡</div>
+        </div>
+        <div class="divider-line"></div>
+      </div>
 
-</script>
+      
+      <div id="blue-portal" class="portal-panel blue-panel">
+        <canvas class="portal-canvas" id="blue-canvas"></canvas>
+      
+        <div class="portal-overlay blue-overlay"></div>
+        <div class="panel-header">
+          <div class="panel-icon">◈</div>
+          <div class="panel-title-group">
+            <h2 class="panel-title">SECURITY</h2>
+            <div class="panel-subtitle">Hacking · Cybersecurity · Digital Warfare</div>
+          </div>
+          <div class="panel-stats">
+            <div class="stat"><span id="blue-count">0</span><small>ARTICLES</small></div>
+          </div>
+        </div>
+        <!-- Matrix canvas decoration -->
+        <canvas id="matrix-canvas"></canvas>
+        <!-- Blog cards container -->
+        <div class="cards-container" id="blue-cards"></div>
+        <div class="panel-footer blue-footer">
+          <div class="footer-circuit"></div>
+        </div>
+      </div>
 
+    </div>
+
+    <!-- Loading overlay for API fetch -->
+    <div id="loading-overlay">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">FETCHING SIGNAL DATA...</div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════
+       BLOG POST MODAL
+  ═══════════════════════════════════════════════════ -->
+  <div id="post-modal" class="modal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">✕ CLOSE</button>
+      <div class="modal-header">
+        <div id="modal-category" class="modal-category"></div>
+        <h2 id="modal-title" class="modal-title"></h2>
+        <div id="modal-meta" class="modal-meta"></div>
+      </div>
+      <div id="modal-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <script src="main.js" defer></script>
 </body>
 </html>
