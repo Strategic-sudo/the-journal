@@ -168,7 +168,7 @@ class IntroParticles {
   animate() {
     if (!this.running) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    // Connection lines
+    
     for (let i = 0; i < this.particles.length; i++) {
       for (let j = i + 1; j < this.particles.length; j++) {
         const dx = this.particles[i].x - this.particles[j].x;
@@ -343,7 +343,7 @@ class ServerLog {
   }
   start() { this.running = true; this.tick(); }
   tick() {
-    if (!this.running || !this.el) return; 
+    if (!this.running || !this.el) return; // FIX #18
     if (this.lineIdx >= this.lines.length) return;
     const line = this.lines[this.lineIdx];
     if (this.charIdx <= line.length) {
@@ -416,7 +416,7 @@ class ExplosionEngine {
     c.fillStyle = 'rgba(2,4,9,0.15)';
     c.fillRect(0,0,this.canvas.width,this.canvas.height);
     this.time++;
-    // Shockwaves
+    
     this.shockwaves.forEach(sw => {
       if (sw.delay>0) { sw.delay-=0.016; return; }
       sw.r += (sw.maxR-sw.r)*0.08; sw.life -= 0.025;
@@ -425,7 +425,7 @@ class ExplosionEngine {
         c.strokeStyle = `rgba(255,255,255,${sw.life*0.5})`; c.lineWidth=2; c.stroke();
       }
     });
-    // Central glow
+    
     if (this.phase==='explode'||this.time<120) {
       const gs = 80+Math.sin(this.time*0.1)*20;
       const grd = c.createRadialGradient(this.cx,this.cy,0,this.cx,this.cy,gs);
@@ -435,7 +435,7 @@ class ExplosionEngine {
       c.beginPath(); c.arc(this.cx,this.cy,gs,0,Math.PI*2);
       c.fillStyle=grd; c.fill();
     }
-    // Particles
+    
     this.particles = this.particles.filter(p=>p.life>0.01);
     this.particles.forEach(p => {
       p.trail.push({x:p.x,y:p.y}); if(p.trail.length>8) p.trail.shift();
@@ -453,7 +453,7 @@ class ExplosionEngine {
       c.beginPath(); c.arc(p.x,p.y,Math.max(0.1,p.r*p.life),0,Math.PI*2);
       c.fillStyle=`rgba(${r},${g},${b},${p.life})`; c.fill();
     });
-    // Stream nebula
+    
     if (this.phase==='streams') {
       const rg=c.createRadialGradient(this.canvas.width*0.15,this.cy,0,this.canvas.width*0.15,this.cy,this.canvas.width*0.3);
       rg.addColorStop(0,'rgba(255,50,0,0.08)'); rg.addColorStop(1,'transparent');
@@ -557,7 +557,7 @@ function animateFinanceGraph() {
     fill.setAttribute('points', [...pts,`${W},${H}`,`0,${H}`].join(' '));
   };
   draw(gen());
- 
+  
   setInterval(() => draw(gen()), 2000);
 }
 
@@ -613,7 +613,6 @@ function renderBlogCards(rawPosts) {
 }
 
 function createCard(post, type) {
-  
   const card = document.createElement('div');
   card.className = `blog-card ${type}-card`;
   card.innerHTML = `
@@ -624,9 +623,527 @@ function createCard(post, type) {
       <span class="card-author">BY ${post.author}${post.date?' &middot; '+post.date:''}</span>
       <button class="card-read-btn">READ &rarr;</button>
     </div>`;
-  card.addEventListener('click', () => openModal(post, type));
-  card.querySelector('.card-read-btn').addEventListener('click', e => { e.stopPropagation(); openModal(post, type); });
+  
+  const launch = () => dragonEyeGate(post, type);
+  card.addEventListener('click', launch);
+  card.querySelector('.card-read-btn').addEventListener('click', e => { e.stopPropagation(); launch(); });
   return card;
+}
+
+
+
+
+class DragonEye {
+  constructor(color) {
+    this.color = color;         
+    this.phase = 'idle';        
+    this.openT = 0;             
+    this.clickZone = null;      
+    this.onPass = null;         
+    this.onAbort = null;        
+    this.raf = null;
+    this.mouseX = window.innerWidth / 2;
+    this.mouseY = window.innerHeight / 2;
+    this._bound_mm = this._onMouseMove.bind(this);
+    this._bound_click = this._onClick.bind(this);
+    this._bound_key = this._onKey.bind(this);
+    this._particles = [];       
+    this._scaleState = 0;       
+    this._breathDir = 1;
+    this._glowPulse = 0;
+    this._lockT = 0;            
+    this._shakeX = 0;
+    this._flicker = 1;
+    this._flickerTimer = 0;
+    this._lidsT = 0;            
+  }
+
+  
+  mount() {
+    this.overlay = document.createElement('div');
+    this.overlay.id = 'dragon-eye-overlay';
+    this.overlay.style.cssText = [
+      'position:fixed','inset:0','z-index:5000',
+      'background:rgba(0,0,0,0)','display:flex',
+      'align-items:center','justify-content:center',
+      'pointer-events:all','cursor:none'
+    ].join(';');
+
+    this.canvas = document.createElement('canvas');
+    this.canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%';
+    this.canvas.width  = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+
+    
+    this.hint = document.createElement('div');
+    this.hint.style.cssText = [
+      'position:absolute','bottom:14%','left:50%',
+      'transform:translateX(-50%)',
+      'font-family:"Share Tech Mono",monospace',
+      'font-size:clamp(.55rem,.9vw,.8rem)',
+      'letter-spacing:.35em','color:rgba(255,255,255,0)',
+      'transition:color .8s','pointer-events:none',
+      'text-align:center','white-space:nowrap'
+    ].join(';');
+    this.hint.textContent = 'CLICK THE EYE TO ENTER';
+
+    this.overlay.appendChild(this.canvas);
+    this.overlay.appendChild(this.hint);
+    document.body.appendChild(this.overlay);
+
+    window.addEventListener('mousemove', this._bound_mm, { passive: true });
+    window.addEventListener('click',     this._bound_click);
+    window.addEventListener('keydown',   this._bound_key);
+
+    
+    const isPrimary = this.color === 'red';
+    for (let i = 0; i < 55; i++) {
+      this._particles.push({
+        x: Math.random() * this.canvas.width,
+        y: Math.random() * this.canvas.height,
+        vx: (Math.random() - .5) * .6,
+        vy: (Math.random() - .5) * .6,
+        r: Math.random() * 1.6 + .3,
+        life: Math.random(),
+        decay: .002 + Math.random() * .004,
+        hue: isPrimary ? (Math.random() * 40) : (185 + Math.random() * 40)
+      });
+    }
+
+    
+    this.phase = 'opening';
+    this.openT = 0;
+    this._raf();
+  }
+
+  
+  destroy() {
+    cancelAnimationFrame(this.raf);
+    window.removeEventListener('mousemove', this._bound_mm);
+    window.removeEventListener('click',     this._bound_click);
+    window.removeEventListener('keydown',   this._bound_key);
+    if (this.overlay && this.overlay.parentNode) {
+      
+      this.overlay.style.transition = 'opacity .5s';
+      this.overlay.style.opacity = '0';
+      setTimeout(() => { if (this.overlay.parentNode) this.overlay.parentNode.removeChild(this.overlay); }, 520);
+    }
+  }
+
+  
+  _onMouseMove(e) { this.mouseX = e.clientX; this.mouseY = e.clientY; }
+  _onKey(e) { if (e.key === 'Escape') { this.destroy(); if (this.onAbort) this.onAbort(); } }
+  _onClick(e) {
+    if (this.phase !== 'open') return;
+    const z = this.clickZone;
+    if (!z) return;
+    const dx = e.clientX - z.cx, dy = e.clientY - z.cy;
+    if (dx*dx + dy*dy <= z.r*z.r) {
+      this.phase = 'clicked';
+      this._triggerPass();
+    }
+  }
+
+  
+  _triggerPass() {
+    
+    this.canvas.style.transition = 'opacity .12s';
+    this.canvas.style.opacity = '0';
+    setTimeout(() => {
+      this.canvas.style.opacity = '1';
+      setTimeout(() => {
+        this.canvas.style.transition = 'opacity .35s';
+        this.canvas.style.opacity = '0';
+        setTimeout(() => { this.destroy(); if (this.onPass) this.onPass(); }, 370);
+      }, 80);
+    }, 120);
+  }
+
+  
+  _raf() {
+    this.raf = requestAnimationFrame(() => {
+      this._update();
+      this._draw();
+      if (this.phase !== 'done') this._raf();
+    });
+  }
+
+  
+  _update() {
+    const dt = 1/60;
+
+    
+    if (this.phase === 'opening') {
+      this.openT = Math.min(1, this.openT + dt / 1.2);
+      if (this.openT >= 1) { this.phase = 'open'; this.hint.style.color = 'rgba(255,255,255,.55)'; }
+    }
+    if (this.phase === 'open') this._lockT += dt;
+
+    
+    this._scaleState += dt * this._breathDir * .4;
+    if (this._scaleState > 1)  { this._scaleState = 1;  this._breathDir = -1; }
+    if (this._scaleState < 0)  { this._scaleState = 0;  this._breathDir =  1; }
+
+    
+    this._glowPulse = (this._glowPulse + dt * 1.8) % (Math.PI * 2);
+
+    
+    this._shakeX = this.phase === 'open' ? Math.sin(this._lockT * 14) * (Math.random() > .97 ? 3 : 0) : 0;
+
+    
+    this._lidsT += dt * .5;
+
+    
+    this._flickerTimer -= dt;
+    if (this._flickerTimer <= 0) {
+      this._flicker = .85 + Math.random() * .15;
+      this._flickerTimer = .04 + Math.random() * .12;
+    }
+
+    
+    this._particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      p.life -= p.decay;
+      if (p.life <= 0) {
+        p.x = Math.random() * this.canvas.width;
+        p.y = Math.random() * this.canvas.height;
+        p.life = 1;
+      }
+    });
+  }
+
+  
+  _draw() {
+    const cv = this.canvas;
+    const ctx = cv.getContext('2d');
+    const W = cv.width, H = cv.height;
+    const cx = W / 2, cy = H / 2;
+
+    
+    const dimA = this.openT * .92;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = `rgba(0,0,0,${dimA})`;
+    ctx.fillRect(0, 0, W, H);
+
+    if (this.openT < .05) return;
+
+    const isRed = this.color === 'red';
+    const C1 = isRed ? '#ff2200' : '#00aaff';
+    const C2 = isRed ? '#ff6600' : '#00e5ff';
+    const C3 = isRed ? '#880000' : '#003366';
+    const C4 = isRed ? '#ff440044' : '#00ccff44';
+    const CG = isRed ? '#ff3300' : '#00c8ff'; 
+
+    ctx.save();
+    ctx.translate(cx + this._shakeX, cy);
+    ctx.globalAlpha = this._flicker;
+
+    
+    const eyeScale = this.openT;
+    const breathScale = 1 + this._scaleState * .018;
+    ctx.scale(eyeScale * breathScale, eyeScale * breathScale);
+
+    
+    const EW = Math.min(W, H) * .52;   
+    const EH = EW * .34;               
+
+    
+    const glowR = EW * .65 + Math.sin(this._glowPulse) * EW * .05;
+    const aura  = ctx.createRadialGradient(0, 0, EH * .2, 0, 0, glowR);
+    aura.addColorStop(0,   `${CG}22`);
+    aura.addColorStop(.4,  `${CG}12`);
+    aura.addColorStop(.8,  `${CG}05`);
+    aura.addColorStop(1,   `${CG}00`);
+    ctx.fillStyle = aura;
+    ctx.beginPath(); ctx.ellipse(0, 0, glowR, glowR * .55, 0, 0, Math.PI*2); ctx.fill();
+
+    
+    const scleraGrad = ctx.createRadialGradient(0, -EH*.15, EH*.1, 0, 0, EW*.42);
+    scleraGrad.addColorStop(0, isRed ? '#2a0800' : '#001528');
+    scleraGrad.addColorStop(.5, isRed ? '#1a0300' : '#000e1a');
+    scleraGrad.addColorStop(1, '#000000');
+    ctx.beginPath(); this._eyePath(ctx, EW, EH, 1);
+    ctx.fillStyle = scleraGrad;
+    ctx.fill();
+
+    
+    ctx.save();
+    ctx.clip(); 
+    this._eyePath(ctx, EW, EH, 1);
+    ctx.beginPath(); this._eyePath(ctx, EW, EH, 1); ctx.clip();
+    if (isRed) {
+      
+      for (let i = 0; i < 18; i++) {
+        const a = (i / 18) * Math.PI * 2;
+        const len = EW * (.2 + Math.random() * .22);
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a)*EH*.25, Math.sin(a)*EH*.15);
+        const mx = Math.cos(a+.3)*len*.55, my = Math.sin(a+.3)*len*.4;
+        ctx.bezierCurveTo(mx*.5, my*.5, mx, my, Math.cos(a)*len, Math.sin(a)*len*.7);
+        ctx.strokeStyle = `rgba(180,0,0,${.08 + Math.random()*.06})`;
+        ctx.lineWidth = .6 + Math.random() * .8;
+        ctx.stroke();
+      }
+    } else {
+      
+      ctx.strokeStyle = 'rgba(0,180,255,.07)';
+      ctx.lineWidth = .8;
+      for (let i = 0; i < 12; i++) {
+        const x0 = (Math.random() - .5) * EW, y0 = (Math.random() - .5) * EH*.8;
+        ctx.beginPath(); ctx.moveTo(x0, y0);
+        ctx.lineTo(x0 + (Math.random()-.5)*EW*.4, y0+(Math.random()-.5)*EH*.4); ctx.stroke();
+      }
+    }
+    ctx.restore();
+
+    
+    const PR = EH * .72;  
+    const irisGrad = ctx.createRadialGradient(0, 0, PR*.05, 0, 0, PR);
+    if (isRed) {
+      irisGrad.addColorStop(0,   '#ff8800');
+      irisGrad.addColorStop(.3,  '#dd2200');
+      irisGrad.addColorStop(.65, '#880000');
+      irisGrad.addColorStop(1,   '#330000');
+    } else {
+      irisGrad.addColorStop(0,   '#00ffff');
+      irisGrad.addColorStop(.3,  '#0088ff');
+      irisGrad.addColorStop(.65, '#003388');
+      irisGrad.addColorStop(1,   '#000033');
+    }
+    ctx.beginPath(); ctx.ellipse(0, 0, PR, PR * .88, 0, 0, Math.PI*2);
+    ctx.fillStyle = irisGrad; ctx.fill();
+
+    
+    for (let i = 1; i <= 6; i++) {
+      const rr = PR * (i/7);
+      ctx.beginPath(); ctx.ellipse(0, 0, rr, rr*.88, 0, 0, Math.PI*2);
+      ctx.strokeStyle = isRed ? `rgba(255,100,0,${.04+i*.015})` : `rgba(0,180,255,${.04+i*.015})`;
+      ctx.lineWidth = .6; ctx.stroke();
+    }
+
+    
+    for (let i = 0; i < 60; i++) {
+      const a = (i/60)*Math.PI*2;
+      const r1 = PR * .18, r2 = PR * (.78 + Math.sin(a*7+this._lidsT)*.05);
+      ctx.beginPath();
+      ctx.moveTo(Math.cos(a)*r1, Math.sin(a)*r1*.88);
+      ctx.lineTo(Math.cos(a)*r2, Math.sin(a)*r2*.88);
+      ctx.strokeStyle = isRed ? `rgba(255,60,0,${.08+Math.abs(Math.sin(a*3))*.07})` : `rgba(0,200,255,${.06+Math.abs(Math.sin(a*3))*.06})`;
+      ctx.lineWidth = .5; ctx.stroke();
+    }
+
+    
+    const PPR = PR * .4;   
+
+    
+    const rawDx = this.mouseX - (W/2 + this._shakeX),
+          rawDy = this.mouseY - H/2;
+    const maxTrack = PR * .22;
+    const trackDist = Math.sqrt(rawDx*rawDx + rawDy*rawDy) || 1;
+    const factor = Math.min(trackDist, maxTrack) / trackDist;
+    const pupilX = rawDx * factor / (eyeScale * breathScale);
+    const pupilY = rawDy * factor / (eyeScale * breathScale);
+
+    
+    this.clickZone = {
+      cx: W/2 + (pupilX + this._shakeX) * eyeScale * breathScale,
+      cy: H/2 + pupilY * eyeScale * breathScale,
+      r:  PPR * 1.1 * eyeScale * breathScale
+    };
+
+    
+    const pupilAura = ctx.createRadialGradient(pupilX, pupilY, 0, pupilX, pupilY, PPR*1.8);
+    pupilAura.addColorStop(0, isRed ? 'rgba(255,50,0,.35)' : 'rgba(0,200,255,.3)');
+    pupilAura.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath(); ctx.ellipse(pupilX, pupilY, PPR*1.8, PPR*1.6, 0, 0, Math.PI*2);
+    ctx.fillStyle = pupilAura; ctx.fill();
+
+    
+    const pupilGrad = ctx.createRadialGradient(pupilX - PPR*.2, pupilY - PPR*.2, PPR*.05, pupilX, pupilY, PPR);
+    pupilGrad.addColorStop(0, isRed ? '#331100' : '#001133');
+    pupilGrad.addColorStop(.6, '#000000');
+    pupilGrad.addColorStop(1,  '#000000');
+    ctx.beginPath(); ctx.ellipse(pupilX, pupilY, PPR, PPR*.92, 0, 0, Math.PI*2);
+    ctx.fillStyle = pupilGrad; ctx.fill();
+
+    
+    ctx.beginPath();
+    ctx.ellipse(pupilX, pupilY, PPR*.22, PPR*.82, 0, 0, Math.PI*2);
+    ctx.fillStyle = '#000'; ctx.fill();
+
+    
+    ctx.beginPath(); ctx.ellipse(pupilX - PPR*.3, pupilY - PPR*.3, PPR*.18, PPR*.12, -Math.PI/4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(pupilX + PPR*.2, pupilY + PPR*.25, PPR*.07, PPR*.05, Math.PI/4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fill();
+
+    
+    if (this.phase === 'open') {
+      const ringA = .4 + Math.sin(this._glowPulse * 2) * .3;
+      ctx.beginPath(); ctx.ellipse(pupilX, pupilY, PPR*1.15, PPR*1.05, 0, 0, Math.PI*2);
+      ctx.strokeStyle = isRed ? `rgba(255,100,0,${ringA})` : `rgba(0,220,255,${ringA})`;
+      ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    
+    this._drawLids(ctx, EW, EH, C1, C2, C3, isRed);
+
+    
+    ctx.beginPath(); this._eyePath(ctx, EW, EH, 1);
+    ctx.strokeStyle = C1;
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = CG; ctx.shadowBlur = 22;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    
+    this._drawLashes(ctx, EW, EH, C1, isRed);
+
+    
+    this._drawScales(ctx, EW, EH, C1, C3, isRed);
+
+    ctx.restore(); 
+
+    
+    ctx.save();
+    this._particles.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `hsla(${p.hue},100%,60%,${p.life * .35})`;
+      ctx.fill();
+    });
+    ctx.restore();
+
+    
+    ctx.fillStyle = `rgba(0,0,0,${dimA * .15})`;
+    for (let y = 0; y < H; y += 4) { ctx.fillRect(0, y, W, 1); }
+  }
+
+  
+  _eyePath(ctx, EW, EH, scale=1) {
+    const w = EW * scale, h = EH * scale;
+    ctx.beginPath();
+    ctx.moveTo(-w, 0);
+    ctx.bezierCurveTo(-w * .6, -h * 1.15, w * .6, -h * 1.15, w, 0);
+    ctx.bezierCurveTo(w * .6,   h * 1.15, -w * .6,  h * 1.15, -w, 0);
+  }
+
+  
+  _drawLids(ctx, EW, EH, C1, C2, C3, isRed) {
+    const lidGrad = ctx.createLinearGradient(0, -EH*1.4, 0, EH*1.4);
+    if (isRed) {
+      lidGrad.addColorStop(0,   '#1a0000');
+      lidGrad.addColorStop(.35, '#2a0500');
+      lidGrad.addColorStop(.5,  'transparent');
+      lidGrad.addColorStop(.65, '#2a0500');
+      lidGrad.addColorStop(1,   '#1a0000');
+    } else {
+      lidGrad.addColorStop(0,   '#000a1a');
+      lidGrad.addColorStop(.35, '#001228');
+      lidGrad.addColorStop(.5,  'transparent');
+      lidGrad.addColorStop(.65, '#001228');
+      lidGrad.addColorStop(1,   '#000a1a');
+    }
+    
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(-EW, 0);
+    ctx.bezierCurveTo(-EW*.6, -EH*1.15, EW*.6, -EH*1.15, EW, 0);
+    ctx.lineTo(EW, -EH*3); ctx.lineTo(-EW, -EH*3); ctx.closePath();
+    ctx.fillStyle = isRed ? '#0a0000' : '#00050f';
+    ctx.fill();
+
+    
+    ctx.beginPath();
+    ctx.moveTo(-EW, 0);
+    ctx.bezierCurveTo(-EW*.6, -EH*1.15, EW*.6, -EH*1.15, EW, 0);
+    ctx.lineTo(EW, -EH*1.2); ctx.lineTo(-EW, -EH*1.2); ctx.closePath();
+    ctx.fillStyle = lidGrad; ctx.fill();
+
+    
+    ctx.beginPath();
+    ctx.moveTo(-EW, 0);
+    ctx.bezierCurveTo(-EW*.6, EH*1.15, EW*.6, EH*1.15, EW, 0);
+    ctx.lineTo(EW, EH*3); ctx.lineTo(-EW, EH*3); ctx.closePath();
+    ctx.fillStyle = isRed ? '#0a0000' : '#00050f';
+    ctx.fill();
+    ctx.restore();
+
+    
+    ctx.save();
+    ctx.strokeStyle = isRed ? 'rgba(100,20,0,.3)' : 'rgba(0,60,120,.3)';
+    ctx.lineWidth = .8;
+    for (let i = 0; i < 8; i++) {
+      const t = (i/8 - .5) * 2;
+      const x = t * EW * .85;
+      const yTop = -EH * (1.02 + Math.abs(t)*.08 + Math.sin(t*3+this._lidsT)*.03);
+      ctx.beginPath(); ctx.moveTo(x, yTop); ctx.lineTo(x + (Math.random()-.5)*8, yTop - EH*.18);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  
+  _drawLashes(ctx, EW, EH, C1, isRed) {
+    const lashColor = isRed ? '#ff2200' : '#00aaff';
+    ctx.save();
+    ctx.strokeStyle = lashColor; ctx.shadowColor = lashColor; ctx.shadowBlur = 6;
+    
+    for (let i = 0; i < 14; i++) {
+      const t = -1 + (i/13) * 2;
+      const ex = t * EW * .98;
+      const ey = -(EH * 1.1) * Math.sqrt(1 - t*t*.9);
+      const angle = Math.atan2(-ey, ex) + Math.PI*.5 + (Math.random()-.5)*.2;
+      const len = EH * (.35 + Math.abs(Math.sin(i*1.3))*.3);
+      ctx.beginPath(); ctx.moveTo(ex, ey);
+      ctx.lineTo(ex + Math.cos(angle)*len, ey + Math.sin(angle)*len);
+      ctx.lineWidth = 1.2 + Math.random()*.8; ctx.stroke();
+    }
+    
+    ctx.shadowBlur = 3;
+    for (let i = 0; i < 10; i++) {
+      const t = -.8 + (i/9)*1.6;
+      const ex = t * EW * .88;
+      const ey = (EH * 1.05) * Math.sqrt(1 - t*t*.9);
+      const angle = Math.atan2(ey, ex) - Math.PI*.5 + (Math.random()-.5)*.2;
+      const len = EH * (.18 + Math.abs(Math.sin(i*1.7))*.15);
+      ctx.beginPath(); ctx.moveTo(ex, ey);
+      ctx.lineTo(ex + Math.cos(angle)*len, ey + Math.sin(angle)*len);
+      ctx.lineWidth = .8; ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  
+  _drawScales(ctx, EW, EH, C1, C3, isRed) {
+    const scaleColor = isRed ? 'rgba(180,30,0,' : 'rgba(0,80,160,';
+    ctx.save();
+    
+    [[-1, 0], [1, 0]].forEach(([sx]) => {
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 5; col++) {
+          const ox = sx * (EW * .82 + col * EW * .14 * sx);
+          const oy = (row - 1) * EH * .45;
+          const sr = EW * .055;
+          ctx.beginPath();
+          ctx.ellipse(ox, oy, sr, sr*.72, 0, 0, Math.PI*2);
+          ctx.strokeStyle = `${scaleColor}${.15 - col*.025})`;
+          ctx.lineWidth = .8;
+          ctx.stroke();
+          ctx.fillStyle = `${scaleColor}${.07 - col*.01})`;
+          ctx.fill();
+        }
+      }
+    });
+    ctx.restore();
+  }
+}
+
+
+function dragonEyeGate(post, type) {
+  const eye = new DragonEye(type);  
+  eye.mount();
+  eye.onPass  = () => openModal(post, type);
+  eye.onAbort = () => {};  
 }
 
 
@@ -732,7 +1249,7 @@ function animateElectronCircuit(sparkEngine, onComplete) {
                 gsap.plugins && gsap.plugins.motionPath;
 
   if (hasMP) {
-   
+    
     tl.to(electronGroup, {
       duration: 4, ease: 'power1.inOut',
       motionPath: { path:'#wire-path', align:'#wire-path', alignOrigin:[0.5,0.5], autoRotate:false },
@@ -743,7 +1260,7 @@ function animateElectronCircuit(sparkEngine, onComplete) {
             const ctm = svgEl.getScreenCTM();
             if (ctm) {
               const m = electronGroup.transform.baseVal.getItem(0).matrix;
-              // SVG CTM maps viewBox coords to screen coords
+              
               const sx = ctm.a * m.e + ctm.c * m.f + ctm.e;
               const sy = ctm.b * m.e + ctm.d * m.f + ctm.f;
               sparkEngine.emit(sx, sy, 3);
@@ -916,7 +1433,7 @@ async function runCinematicSequence() {
 
           gsap.to(flash, {
             opacity: 0, duration: 0.8, ease: 'power2.out',
-            // FIX #19: resolve AFTER fade-out completes, not inside async onComplete
+            
             onComplete: () => { flash.remove(); resolve(); }
           });
         }
@@ -943,14 +1460,14 @@ async function initPortal() {
   animateFinanceGraph();
   initNavFilter();
 
- 
+  
   const modalClose    = document.getElementById('modal-close');
   const modalBackdrop = document.querySelector('.modal-backdrop');
   if (modalClose)    modalClose.addEventListener('click', closeModal);
   if (modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
   document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
 
-  // Fetch posts — FIX #20: real API → mock fallback
+  
   const overlay = document.getElementById('loading-overlay');
   try {
     const posts = await fetchPosts();
@@ -990,7 +1507,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initCursorSparks();
   runCinematicSequence();
 
-  
+ 
   window.addEventListener('resize', () => {
     ['explosion-canvas','server-canvas','spark-canvas'].forEach(id => {
       const c = document.getElementById(id);
