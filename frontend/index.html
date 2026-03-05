@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JOURNAL</title>
+  <title>JOURNAL — Cinematic Blog Portal</title>
   <link rel="stylesheet" href="style.css" />
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -19,7 +19,7 @@
       }
     });
   </script>
- 
+  
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet" />
@@ -111,7 +111,7 @@
 
       
       <g id="components" opacity="0.7">
-       
+        
         <rect x="275" y="190" width="50" height="20" rx="3" fill="none" stroke="#b87333" stroke-width="1.5"/>
         <line x1="275" y1="200" x2="260" y2="200" stroke="#b87333" stroke-width="1.5"/>
         <line x1="325" y1="200" x2="340" y2="200" stroke="#b87333" stroke-width="1.5"/>
@@ -136,6 +136,7 @@
         <text x="900" y="502" text-anchor="middle" fill="#00ff44" font-size="8" font-family="Share Tech Mono">CPU</text>
       </g>
 
+      
       
       <path id="wire-path-shadow"
         d="M 60,350
@@ -265,9 +266,9 @@
     </div>
   </section>
 
-  
+ 
   <section id="scene-portal" class="scene">
-   
+    
     <nav id="main-nav">
       <div class="nav-logo">◈ JOURNAL</div>
       <div class="nav-links">
@@ -278,6 +279,7 @@
       <div class="nav-status">
         <span class="live-dot"></span> LIVE FEED
       </div>
+      <a href="login.html" class="nav-link admin-link" style="font-size:.55rem;letter-spacing:.2em;opacity:.4;margin-left:8px;border:1px solid rgba(0,255,68,.2);padding:3px 9px;color:rgba(0,255,68,.6);text-decoration:none;transition:all .2s" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.4">⬛ ADMIN</a>
     </nav>
 
     
@@ -286,7 +288,7 @@
       
       <div id="red-portal" class="portal-panel red-panel">
         <canvas class="portal-canvas" id="red-canvas"></canvas>
-       
+        
         <div class="portal-overlay red-overlay"></div>
         <div class="panel-header">
           <div class="panel-icon">◉</div>
@@ -324,7 +326,7 @@
       
       <div id="blue-portal" class="portal-panel blue-panel">
         <canvas class="portal-canvas" id="blue-canvas"></canvas>
-      
+        
         <div class="portal-overlay blue-overlay"></div>
         <div class="panel-header">
           <div class="panel-icon">◈</div>
@@ -338,7 +340,7 @@
         </div>
         
         <canvas id="matrix-canvas"></canvas>
-       
+        
         <div class="cards-container" id="blue-cards"></div>
         <div class="panel-footer blue-footer">
           <div class="footer-circuit"></div>
@@ -354,7 +356,7 @@
     </div>
   </section>
 
-  
+ 
   <div id="post-modal" class="modal">
     <div class="modal-backdrop"></div>
     <div class="modal-content">
