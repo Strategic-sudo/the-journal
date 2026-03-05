@@ -160,7 +160,7 @@ app.post('/api/auth/login', async (c) => {
     const valid = row && storedHash ? await verifyPassword(password, storedHash) : (await verifyPassword(password, dummyHash), false)
 
     if (!valid) {
-      // Add artificial delay to further slow brute force
+     
       await new Promise(r => setTimeout(r, 500 + Math.random() * 300))
       return c.json({ error: 'Invalid credentials' }, 401)
     }
@@ -192,7 +192,7 @@ app.post('/api/auth/setup', async (c) => {
     return c.json({ error: 'Forbidden' }, 403)
   }
 
-  // Check no users exist yet
+  
   const existing = await c.env.DB.prepare('SELECT COUNT(*) as n FROM auth').first()
   if (existing && existing.n > 0) {
     return c.json({ error: 'Setup already completed — use login endpoint' }, 409)
@@ -204,7 +204,7 @@ app.post('/api/auth/setup', async (c) => {
 
   try {
     const hash = await hashPassword(password)
-    // Include 'password' column with placeholder to satisfy NOT NULL constraint on legacy schema
+    
     await c.env.DB.prepare('INSERT INTO auth (username, password, hash) VALUES (?, ?, ?)').bind(username, 'managed_by_hash', hash).run()
     return c.json({ ok: true, message: 'Admin account created. Remove or protect this endpoint.' }, 201)
   } catch (err) {
