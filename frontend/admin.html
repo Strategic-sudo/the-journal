@@ -1,129 +1,88 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin Dashboard - The Journal</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Mono&family=Crimson+Pro&display=swap" rel="stylesheet">
-<style>
-body {
-  background:#0a0a0a;
-  color:#e8e0d0;
-  font-family:'Crimson Pro',serif;
-  padding:2rem;
-}
-h1 {
-  font-family:'Playfair Display',serif;
-  margin-bottom:2rem;
-}
-input, textarea, select {
-  width:100%;
-  margin-bottom:1rem;
-  padding:.6rem;
-  background:#111;
-  border:1px solid #333;
-  color:white;
-}
-button {
-  padding:.7rem 1.5rem;
-  background:#c0392b;
-  border:none;
-  color:white;
-  cursor:pointer;
-  margin-right:.5rem;
-}
-.post {
-  border-bottom:1px solid #333;
-  padding:1rem 0;
-}
-.small {
-  font-size:.8rem;
-  color:#aaa;
-}
-</style>
+<title>Admin Panel</title>
 </head>
+
 <body>
 
-<script>
-if(sessionStorage.getItem("blog_auth") !== "true"){
-  window.location.href = "login.html";
-}
-</script>
-
-<h1>Admin Dashboard</h1>
-
-<button onclick="logout()">Logout</button>
-
 <h2>Create Post</h2>
-<input type="text" id="title" placeholder="Post title">
-<select id="category"></select>
-<textarea id="body" rows="8" placeholder="Write HTML content here..."></textarea>
+
+<input id="title" placeholder="title">
+<textarea id="content"></textarea>
+
 <button onclick="createPost()">Publish</button>
 
 <h2>Posts</h2>
+
 <div id="posts"></div>
 
 <script>
-const getBlogs = () => JSON.parse(localStorage.getItem('blog_posts') || '[]');
-const saveBlogs = posts => localStorage.setItem('blog_posts', JSON.stringify(posts));
-const getCats = () => JSON.parse(localStorage.getItem('blog_categories') || '["General","Technology","Life","Travel"]');
 
-function logout(){
-  sessionStorage.removeItem("blog_auth");
-  window.location.href="index.html";
+async function createPost(){
+
+const token=sessionStorage.getItem("auth")
+
+const title=document.getElementById("title").value
+const content=document.getElementById("content").value
+
+await fetch("/api/posts",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json",
+Authorization:"Basic "+token
+},
+
+body:JSON.stringify({
+title:title,
+content:content
+})
+
+})
+
+loadPosts()
+
 }
 
-function renderCategories(){
-  const select = document.getElementById("category");
-  select.innerHTML="";
-  getCats().forEach(c=>{
-    select.innerHTML += `<option value="${c}">${c}</option>`;
-  });
+async function deletePost(id){
+
+const token=sessionStorage.getItem("auth")
+
+await fetch("/api/posts/"+id,{
+method:"DELETE",
+headers:{Authorization:"Basic "+token}
+})
+
+loadPosts()
+
 }
 
-function createPost(){
-  const title = document.getElementById("title").value;
-  const body = document.getElementById("body").value;
-  const category = document.getElementById("category").value;
+async function loadPosts(){
 
-  if(!title || !body) return;
+const res=await fetch("/api/posts")
+const posts=await res.json()
 
-  const posts = getBlogs();
-  posts.push({
-    id: crypto.randomUUID(),
-    title,
-    body,
-    category,
-    date: new Date().toISOString()
-  });
+const div=document.getElementById("posts")
 
-  saveBlogs(posts);
-  document.getElementById("title").value="";
-  document.getElementById("body").value="";
-  renderPosts();
+div.innerHTML=""
+
+posts.forEach(p=>{
+
+div.innerHTML+=`
+<div>
+<b>${p.title}</b>
+<button onclick="deletePost(${p.id})">Delete</button>
+</div>
+`
+
+})
+
 }
 
-function deletePost(id){
-  let posts = getBlogs();
-  posts = posts.filter(p=>p.id!==id);
-  saveBlogs(posts);
-  renderPosts();
-}
+loadPosts()
 
-function renderPosts(){
-  const posts = getBlogs().sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const container = document.getElementById("posts");
-  container.innerHTML = posts.map(p=>`
-    <div class="post">
-      <strong>${p.title}</strong>
-      <div class="small">${new Date(p.date).toLocaleString()}</div>
-      <button onclick="deletePost('${p.id}')">Delete</button>
-    </div>
-  `).join('');
-}
-
-renderCategories();
-renderPosts();
 </script>
 
 </body>
