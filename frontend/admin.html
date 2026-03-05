@@ -1,398 +1,410 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JOURNAL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root{
-      --void:#020409;--g:#00ff44;--c:#00ffff;--r:#ff3300;--b:#00c8ff;
-      --mono:'Share Tech Mono',monospace;--title:'Orbitron',monospace;--body:'Rajdhani',sans-serif;
-      --bdr:rgba(0,255,68,.14);--bdr2:rgba(0,255,68,.45);
-    }
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    html{scroll-behavior:smooth}
-    body{background:var(--void);color:#fff;font-family:var(--body);min-height:100vh;overflow-x:hidden}
-    ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(0,255,68,.18)}
-    body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;
-      background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,68,.007) 2px,rgba(0,255,68,.007) 4px)}
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>JOURNAL</title>
 
-    
-    nav{
-      position:sticky;top:0;z-index:50;padding:13px 36px;
-      background:rgba(2,4,9,.96);border-bottom:1px solid var(--bdr);
-      display:flex;align-items:center;gap:20px;backdrop-filter:blur(12px)
-    }
-    .brand{font-family:var(--title);font-size:.85rem;font-weight:900;letter-spacing:.3em;color:var(--g);
-      text-shadow:0 0 12px rgba(0,255,68,.35)}
-    .nav-sep{color:rgba(255,255,255,.08)}
-    .nav-sec{font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;color:rgba(255,255,255,.28)}
-    .nav-r{margin-left:auto;display:flex;align-items:center;gap:14px}
-    #nav-user{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;color:rgba(0,255,68,.45)}
-    .nbtn{
-      font-family:var(--mono);font-size:.52rem;letter-spacing:.18em;padding:5px 11px;
-      background:transparent;border:1px solid rgba(255,51,0,.3);color:rgba(255,51,0,.65);
-      cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block
-    }
-    .nbtn:hover{background:rgba(255,51,0,.09);color:var(--r);border-color:rgba(255,51,0,.6)}
-    .nbtn.green{border-color:rgba(0,255,68,.28);color:rgba(0,255,68,.55)}
-    .nbtn.green:hover{background:rgba(0,255,68,.07);color:var(--g)}
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
 
-    
-    main{max-width:1080px;margin:0 auto;padding:38px 28px;display:flex;flex-direction:column;gap:40px}
+<style>
 
-    
-    .sh{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-    .sh-title{font-family:var(--title);font-size:.7rem;letter-spacing:.32em;color:var(--g);
-      text-shadow:0 0 10px rgba(0,255,68,.25)}
-    .sh-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(0,255,68,.28),transparent)}
-    .sh-cnt{font-family:var(--mono);font-size:.5rem;letter-spacing:.18em;color:rgba(0,255,68,.35)}
+:root{
+--void:#020409;
+--g:#00ff44;
+--c:#00ffff;
+--r:#ff3300;
+--b:#00c8ff;
+--mono:'Share Tech Mono',monospace;
+--title:'Orbitron',monospace;
+--body:'Rajdhani',sans-serif;
+--bdr:rgba(0,255,68,.14);
+--bdr2:rgba(0,255,68,.45);
+}
 
-    
-    .stats{display:flex;gap:14px;flex-wrap:wrap}
-    .scard{
-      flex:1;min-width:130px;padding:18px 20px;
-      background:rgba(0,255,68,.02);border:1px solid var(--bdr);position:relative;overflow:hidden
-    }
-    .scard::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
-    .scard.g::after{background:var(--g)}.scard.r::after{background:var(--r)}.scard.b::after{background:var(--b)}
-    .sv{font-family:var(--title);font-size:1.9rem;font-weight:900;color:#fff;margin-bottom:3px}
-    .sl{font-family:var(--mono);font-size:.48rem;letter-spacing:.28em;color:rgba(255,255,255,.22)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
 
-    
-    .cbox{
-      background:rgba(0,8,4,.72);border:1px solid var(--bdr);padding:30px;
-      position:relative
-    }
-    .cbox::before,.cbox::after{content:'';position:absolute;width:14px;height:14px}
-    .cbox::before{top:-1px;left:-1px;border-top:2px solid var(--g);border-left:2px solid var(--g)}
-    .cbox::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--g);border-right:2px solid var(--g)}
-    .frow{display:flex;gap:14px;margin-bottom:14px}
-    .fg{flex:1;display:flex;flex-direction:column;gap:7px}
-    .fl{font-family:var(--mono);font-size:.5rem;letter-spacing:.24em;color:rgba(0,255,68,.5)}
-    input.fi,select.fi,textarea.fi{
-      background:rgba(0,255,68,.03);border:1px solid rgba(0,255,68,.14);color:#fff;
-      font-family:var(--mono);font-size:.78rem;padding:9px 11px;outline:none;
-      transition:border-color .3s,box-shadow .3s;width:100%
-    }
-    select.fi option{background:#06091a}
-    input.fi:focus,select.fi:focus,textarea.fi:focus{
-      border-color:rgba(0,255,68,.48);box-shadow:0 0 12px rgba(0,255,68,.05)
-    }
-    textarea.fi{resize:vertical;min-height:110px;line-height:1.6}
-    .cc{font-family:var(--mono);font-size:.48rem;letter-spacing:.12em;color:rgba(255,255,255,.12);text-align:right}
-    .facts{display:flex;gap:10px;align-items:center;margin-top:7px}
-    .sbtn{
-      font-family:var(--mono);font-size:.62rem;letter-spacing:.22em;padding:11px 24px;
-      background:transparent;border:1px solid rgba(0,255,68,.38);color:var(--g);
-      cursor:pointer;transition:all .3s;position:relative;overflow:hidden
-    }
-    .sbtn::before{
-      content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
-      background:linear-gradient(90deg,transparent,rgba(0,255,68,.08),transparent);transition:left .4s
-    }
-    .sbtn:hover::before{left:100%}
-    .sbtn:hover{background:rgba(0,255,68,.07);box-shadow:0 0 18px rgba(0,255,68,.09)}
-    .sbtn:disabled{opacity:.28;pointer-events:none}
-    .sbtn.dim{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.3)}
-    .fst{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;min-height:15px}
-    .fst.ok{color:var(--g)}.fst.err{color:var(--r)}
+body{
+background:var(--void);
+color:#fff;
+font-family:var(--body);
+min-height:100vh;
+overflow-x:hidden
+}
 
-    
-    table{width:100%;border-collapse:collapse}
-    th{font-family:var(--mono);font-size:.48rem;letter-spacing:.22em;color:rgba(0,255,68,.4);
-       padding:9px 12px;border-bottom:1px solid rgba(0,255,68,.09);text-align:left;font-weight:normal}
-    td{padding:13px 12px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle;
-       font-family:var(--body);font-size:.82rem;color:rgba(255,255,255,.68)}
-    tr:hover td{background:rgba(0,255,68,.015)}
-    .idc{font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.18);width:38px}
-    .badge{font-family:var(--mono);font-size:.48rem;letter-spacing:.14em;padding:2px 6px;border:1px solid;display:inline-block}
-    .badge.r{color:var(--r);border-color:rgba(255,51,0,.38)}.badge.b{color:var(--b);border-color:rgba(0,200,255,.38)}
-    .datec{font-family:var(--mono);font-size:.55rem;color:rgba(255,255,255,.22);white-space:nowrap}
-    .delbtn{
-      font-family:var(--mono);font-size:.52rem;letter-spacing:.09em;padding:4px 9px;
-      background:transparent;border:1px solid rgba(255,51,0,.22);color:rgba(255,51,0,.48);
-      cursor:pointer;transition:all .2s
-    }
-    .delbtn:hover{background:rgba(255,51,0,.09);color:var(--r);border-color:rgba(255,51,0,.55)}
-    .delbtn.conf{border-color:var(--r);color:var(--r);animation:cpulse .5s ease-in-out 2}
-    @keyframes cpulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 10px rgba(255,51,0,.35)}}
-    .erow td{text-align:center;font-family:var(--mono);font-size:.55rem;letter-spacing:.22em;
-             color:rgba(255,255,255,.1);padding:38px}
+nav{
+position:sticky;
+top:0;
+z-index:50;
+padding:13px 36px;
+background:rgba(2,4,9,.96);
+border-bottom:1px solid var(--bdr);
+display:flex;
+align-items:center;
+gap:20px
+}
 
-    
-    .cmt{
-      padding:14px 18px;border:1px solid rgba(255,255,255,.04);
-      background:rgba(255,255,255,.008);margin-bottom:9px;position:relative
-    }
-    .cmt::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%;background:var(--b)}
-    .cmt-meta{display:flex;gap:12px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
-    .cmt-auth{font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;color:var(--b)}
-    .cmt-post{font-family:var(--mono);font-size:.5rem;letter-spacing:.09em;color:rgba(255,255,255,.18)}
-    .cmt-date{font-family:var(--mono);font-size:.46rem;color:rgba(255,255,255,.18);margin-left:auto}
-    .cmt-txt{font-size:.82rem;color:rgba(255,255,255,.52);line-height:1.5}
+.brand{
+font-family:var(--title);
+font-size:.85rem;
+font-weight:900;
+letter-spacing:.3em;
+color:var(--g)
+}
 
-    
-    #toasts{position:fixed;bottom:26px;right:26px;display:flex;flex-direction:column;gap:9px;z-index:200}
-    .toast{
-      font-family:var(--mono);font-size:.55rem;letter-spacing:.14em;padding:11px 18px;
-      border:1px solid;background:rgba(2,4,9,.97);
-      transform:translateX(120px);opacity:0;transition:all .38s cubic-bezier(.16,1,.3,1);max-width:280px
-    }
-    .toast.show{transform:translateX(0);opacity:1}
-    .toast.ok{border-color:rgba(0,255,68,.45);color:var(--g)}
-    .toast.err{border-color:rgba(255,51,0,.45);color:var(--r)}
-    .toast.info{border-color:rgba(0,200,255,.35);color:var(--b)}
+.nav-sep{color:rgba(255,255,255,.08)}
 
-    @media(max-width:720px){
-      nav{padding:10px 14px} main{padding:20px 14px}
-      .frow{flex-direction:column} .stats{flex-direction:column}
-    }
-  </style>
+.nav-sec{
+font-family:var(--mono);
+font-size:.55rem;
+letter-spacing:.2em;
+color:rgba(255,255,255,.28)
+}
+
+.nav-r{
+margin-left:auto;
+display:flex;
+align-items:center;
+gap:14px
+}
+
+#nav-user{
+font-family:var(--mono);
+font-size:.55rem;
+letter-spacing:.14em;
+color:rgba(0,255,68,.45)
+}
+
+.nbtn{
+font-family:var(--mono);
+font-size:.52rem;
+letter-spacing:.18em;
+padding:5px 11px;
+background:transparent;
+border:1px solid rgba(255,51,0,.3);
+color:rgba(255,51,0,.65);
+cursor:pointer;
+text-decoration:none
+}
+
+.nbtn.green{
+border-color:rgba(0,255,68,.28);
+color:rgba(0,255,68,.55)
+}
+
+main{
+max-width:1080px;
+margin:0 auto;
+padding:38px 28px;
+display:flex;
+flex-direction:column;
+gap:40px
+}
+
+.sh{
+display:flex;
+align-items:center;
+gap:14px;
+margin-bottom:18px
+}
+
+.sh-title{
+font-family:var(--title);
+font-size:.7rem;
+letter-spacing:.32em;
+color:var(--g)
+}
+
+.sh-line{
+flex:1;
+height:1px;
+background:linear-gradient(90deg,rgba(0,255,68,.28),transparent)
+}
+
+.cbox{
+background:rgba(0,8,4,.72);
+border:1px solid var(--bdr);
+padding:30px
+}
+
+.fi{
+background:rgba(0,255,68,.03);
+border:1px solid rgba(0,255,68,.14);
+color:#fff;
+font-family:var(--mono);
+font-size:.78rem;
+padding:9px 11px;
+width:100%
+}
+
+textarea.fi{
+min-height:110px
+}
+
+.sbtn{
+font-family:var(--mono);
+font-size:.62rem;
+letter-spacing:.22em;
+padding:11px 24px;
+background:transparent;
+border:1px solid rgba(0,255,68,.38);
+color:var(--g);
+cursor:pointer
+}
+
+table{
+width:100%;
+border-collapse:collapse
+}
+
+th{
+font-family:var(--mono);
+font-size:.48rem;
+letter-spacing:.22em;
+padding:9px 12px;
+border-bottom:1px solid rgba(0,255,68,.09)
+}
+
+td{
+padding:13px 12px;
+border-bottom:1px solid rgba(255,255,255,.03)
+}
+
+.delbtn{
+font-family:var(--mono);
+font-size:.52rem;
+padding:4px 9px;
+background:transparent;
+border:1px solid rgba(255,51,0,.22);
+color:rgba(255,51,0,.48);
+cursor:pointer
+}
+
+#toasts{
+position:fixed;
+bottom:26px;
+right:26px;
+display:flex;
+flex-direction:column;
+gap:9px
+}
+
+.toast{
+font-family:var(--mono);
+font-size:.55rem;
+letter-spacing:.14em;
+padding:11px 18px;
+border:1px solid;
+background:rgba(2,4,9,.97);
+opacity:0;
+transform:translateX(120px);
+transition:.3s
+}
+
+.toast.show{
+opacity:1;
+transform:translateX(0)
+}
+
+.toast.ok{border-color:rgba(0,255,68,.45);color:var(--g)}
+.toast.err{border-color:rgba(255,51,0,.45);color:var(--r)}
+
+</style>
+
 </head>
+
 <body>
 
 <nav>
-  <div class="brand">JOURNAL</div>
-  <span class="nav-sep">|</span>
-  <div class="nav-sec">ADMIN</div>
-  <div class="nav-r">
-    <span id="nav-user"></span>
-    <a href="index.html" class="nbtn green">VIEW SITE</a>
-    <button class="nbtn" id="logout">LOGOUT</button>
-  </div>
+<div class="brand">JOURNAL</div>
+<span class="nav-sep">|</span>
+<div class="nav-sec">ADMIN</div>
+
+<div class="nav-r">
+<span id="nav-user"></span>
+<a href="index.html" class="nbtn green">VIEW SITE</a>
+<button class="nbtn" id="logout">LOGOUT</button>
+</div>
 </nav>
 
 <main>
-  
-  <div class="stats">
-    <div class="scard g"><div class="sv" id="st-total">—</div><div class="sl">TOTAL POSTS</div></div>
-    <div class="scard r"><div class="sv" id="st-red">—</div><div class="sl">SOCIETY / RED</div></div>
-    <div class="scard b"><div class="sv" id="st-blue">—</div><div class="sl">SECURITY / BLUE</div></div>
-    <div class="scard g"><div class="sv" id="st-cmts">—</div><div class="sl">COMMENTS</div></div>
-  </div>
 
-  
-  <section>
-    <div class="sh"><div class="sh-title">CREATE NEW POST</div><div class="sh-line"></div></div>
-    <div class="cbox">
-      <div class="frow">
-        <div class="fg">
-          <label class="fl" for="f-title">TITLE *</label>
-          <input id="f-title" class="fi" type="text" placeholder="Post title…" maxlength="200"/>
-        </div>
-        <div class="fg" style="max-width:170px">
-          <label class="fl" for="f-cat">CATEGORY *</label>
-          <select id="f-cat" class="fi">
-            <option>GEOPOLITICS</option><option>ECONOMICS</option><option>SOCIETY</option>
-            <option>CYBERSECURITY</option><option>HACKING</option>
-          </select>
-        </div>
-        <div class="fg" style="max-width:140px">
-          <label class="fl" for="f-auth">AUTHOR</label>
-          <input id="f-auth" class="fi" type="text" placeholder="Author" maxlength="80"/>
-        </div>
-      </div>
-      <div class="fg" style="margin-bottom:14px">
-        <label class="fl" for="f-exc">EXCERPT <span style="color:rgba(255,255,255,.18)">(shown on card)</span></label>
-        <input id="f-exc" class="fi" type="text" placeholder="Short summary…" maxlength="300"/>
-      </div>
-      <div class="fg">
-        <label class="fl" for="f-body">CONTENT * <span style="color:rgba(255,255,255,.15)">(double-newline = paragraph)</span></label>
-        <textarea id="f-body" class="fi" placeholder="Full article…"></textarea>
-        <div class="cc"><span id="cc">0</span> CHARS</div>
-      </div>
-      <div class="facts">
-        <button class="sbtn" id="create-btn">TRANSMIT POST</button>
-        <button class="sbtn dim" id="clear-btn">CLEAR</button>
-        <span class="fst" id="fst"></span>
-      </div>
-    </div>
-  </section>
+<section>
 
-  
-  <section>
-    <div class="sh">
-      <div class="sh-title">ALL POSTS</div>
-      <div class="sh-line"></div>
-      <button class="nbtn green" id="refresh-btn">↻ REFRESH</button>
-    </div>
-    <table>
-      <thead><tr>
-        <th>#</th><th>TITLE</th><th>CATEGORY</th><th>AUTHOR</th><th>DATE</th><th>ACTION</th>
-      </tr></thead>
-      <tbody id="ptbody"><tr class="erow"><td colspan="6">LOADING…</td></tr></tbody>
-    </table>
-  </section>
+<div class="sh">
+<div class="sh-title">CREATE NEW POST</div>
+<div class="sh-line"></div>
+</div>
 
-  
-  <section>
-    <div class="sh">
-      <div class="sh-title">RECENT COMMENTS</div>
-      <div class="sh-line"></div>
-      <span class="sh-cnt" id="cmt-cnt">0 SIGNALS</span>
-    </div>
-    <div id="cmts-list">
-      <div style="font-family:var(--mono);font-size:.55rem;letter-spacing:.2em;color:rgba(255,255,255,.1);padding:28px 0;text-align:center">LOADING…</div>
-    </div>
-  </section>
+<div class="cbox">
+
+<input id="f-title" class="fi" placeholder="Title"/><br><br>
+
+<select id="f-cat" class="fi">
+<option>GEOPOLITICS</option>
+<option>ECONOMICS</option>
+<option>SOCIETY</option>
+<option>CYBERSECURITY</option>
+<option>HACKING</option>
+</select><br><br>
+
+<input id="f-auth" class="fi" placeholder="Author"/><br><br>
+
+<input id="f-exc" class="fi" placeholder="Excerpt"/><br><br>
+
+<textarea id="f-body" class="fi" placeholder="Content"></textarea><br><br>
+
+<button class="sbtn" id="create-btn">TRANSMIT POST</button>
+
+</div>
+
+</section>
+
+<section>
+
+<div class="sh">
+<div class="sh-title">ALL POSTS</div>
+<div class="sh-line"></div>
+<button class="nbtn green" id="refresh-btn">REFRESH</button>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>TITLE</th>
+<th>CATEGORY</th>
+<th>AUTHOR</th>
+<th>DATE</th>
+<th>ACTION</th>
+</tr>
+</thead>
+
+<tbody id="ptbody">
+<tr>
+<td colspan="6">Loading...</td>
+</tr>
+</tbody>
+
+</table>
+
+</section>
+
 </main>
 
 <div id="toasts"></div>
 
 <script>
-(()=>{
-'use strict';
-const API='https://the-journal.pavlositpro.workers.dev';
-const TOKEN=sessionStorage.getItem('jrn_token');
-const USER=sessionStorage.getItem('jrn_user')||'ADMIN';
-if(!TOKEN){location.href='login.html';throw 0;}
 
-document.getElementById('nav-user').textContent=`LOGGED IN: ${USER.toUpperCase()}`;
+const API="https://the-journal.pavlositpro.workers.dev"
 
-const esc=s=>{const d=document.createElement('div');d.textContent=String(s||'');return d.innerHTML;};
-const catType=c=>{const u=(c||'').toUpperCase();return(u.includes('SECURITY')||u.includes('HACK')||u.includes('CYBER'))?'blue':'red';};
+const TOKEN=sessionStorage.getItem("jrn_token")
+const USER=sessionStorage.getItem("jrn_user")||"ADMIN"
 
-async function af(path,opts={}){
-  const r=await fetch(`${API}${path}`,{
-    ...opts,mode:'cors',
-    headers:{'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${TOKEN}`,...(opts.headers||{})}
-  });
-  if(r.status===401){sessionStorage.clear();location.href='login.html';throw new Error('401');}
-  return r;
+if(!TOKEN){
+location.href="login.html"
 }
 
-function toast(msg,type='info'){
-  const el=document.createElement('div');
-  el.className=`toast ${type}`;el.textContent=msg;
-  document.getElementById('toasts').appendChild(el);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
-  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),400);},3000);
+document.getElementById("nav-user").textContent="LOGGED IN: "+USER
+
+function toast(msg,type="ok"){
+const el=document.createElement("div")
+el.className="toast "+type
+el.textContent=msg
+document.getElementById("toasts").appendChild(el)
+
+setTimeout(()=>{el.classList.add("show")},10)
+setTimeout(()=>{el.remove()},3000)
 }
 
+async function api(path,opts={}){
+const r=await fetch(API+path,{
+...opts,
+headers:{
+"Content-Type":"application/json",
+"Authorization":"Bearer "+TOKEN
+}
+})
 
-let allPosts=[];
+if(r.status==401){
+sessionStorage.clear()
+location.href="login.html"
+}
+
+return r
+}
+
 async function loadPosts(){
-  document.getElementById('ptbody').innerHTML='<tr class="erow"><td colspan="6">LOADING…</td></tr>';
-  try{
-    const r=await af('/api/posts');
-    allPosts=await r.json();
-    renderTable(allPosts);
-    updateStats(allPosts);
-  }catch(e){
-    if(e.message!=='401'){
-      document.getElementById('ptbody').innerHTML='<tr class="erow"><td colspan="6">ERROR LOADING POSTS</td></tr>';
-      toast('Failed to load posts','err');
-    }
-  }
+
+const res=await api("/api/posts")
+const posts=await res.json()
+
+const tbody=document.getElementById("ptbody")
+
+if(!posts.length){
+tbody.innerHTML="<tr><td colspan='6'>NO POSTS</td></tr>"
+return
 }
 
-function renderTable(posts){
-  const tb=document.getElementById('ptbody');
-  if(!posts.length){tb.innerHTML='<tr class="erow"><td colspan="6">NO TRANSMISSIONS — CREATE ONE ABOVE</td></tr>';return;}
-  tb.innerHTML=posts.map(p=>{
-    const t=catType(p.category);
-    const d=p.date?esc(p.date).slice(0,10):'—';
-    return `<tr><td class="idc">${esc(p.id)}</td>
-      <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.title)}">${esc(p.title)}</td>
-      <td><span class="badge ${t[0]}">${esc(p.category||'—')}</span></td>
-      <td style="font-family:var(--mono);font-size:.6rem;color:rgba(255,255,255,.32)">${esc(p.author||'—')}</td>
-      <td class="datec">${d}</td>
-      <td><button class="delbtn" data-id="${p.id}">DELETE</button></td></tr>`;
-  }).join('');
-  tb.querySelectorAll('.delbtn').forEach(btn=>{
-    let conf=false;
-    btn.addEventListener('click',async()=>{
-      if(!conf){conf=true;btn.textContent='CONFIRM?';btn.classList.add('conf');setTimeout(()=>{conf=false;btn.textContent='DELETE';btn.classList.remove('conf');},2200);return;}
-      const id=btn.dataset.id;btn.textContent='…';btn.disabled=true;
-      try{
-        const r=await af(`/api/posts/${id}`,{method:'DELETE'});
-        if(r.ok){toast(`Post #${id} deleted`,'ok');await loadPosts();await loadComments(allPosts);}
-        else{const d=await r.json();toast(d.error||'Delete failed','err');btn.disabled=false;btn.textContent='DELETE';}
-      }catch(e){if(e.message!=='401'){toast('Network error','err');btn.disabled=false;btn.textContent='DELETE';}}
-    });
-  });
+tbody.innerHTML=posts.map(p=>`
+<tr>
+<td>${p.id}</td>
+<td>${p.title}</td>
+<td>${p.category||""}</td>
+<td>${p.author||""}</td>
+<td>${p.date?p.date.slice(0,10):""}</td>
+<td><button class="delbtn" data-id="${p.id}">DELETE</button></td>
+</tr>
+`).join("")
+
+document.querySelectorAll(".delbtn").forEach(btn=>{
+btn.onclick=async()=>{
+await api("/api/posts/"+btn.dataset.id,{method:"DELETE"})
+toast("Post deleted","ok")
+loadPosts()
+}
+})
+
 }
 
-function updateStats(posts){
-  document.getElementById('st-total').textContent=posts.length;
-  document.getElementById('st-red').textContent=posts.filter(p=>catType(p.category)==='red').length;
-  document.getElementById('st-blue').textContent=posts.filter(p=>catType(p.category)==='blue').length;
+document.getElementById("create-btn").onclick=async()=>{
+
+const title=document.getElementById("f-title").value
+const category=document.getElementById("f-cat").value
+const author=document.getElementById("f-auth").value
+const excerpt=document.getElementById("f-exc").value
+const content=document.getElementById("f-body").value
+
+if(!title||!content){
+toast("Title and content required","err")
+return
 }
 
+await api("/api/posts",{
+method:"POST",
+body:JSON.stringify({title,category,author,excerpt,content})
+})
 
-async function loadComments(posts){
-  if(!posts.length){
-    document.getElementById('cmts-list').innerHTML='<div style="font-family:var(--mono);font-size:.55rem;letter-spacing:.18em;color:rgba(255,255,255,.1);padding:28px 0;text-align:center">NO POSTS YET</div>';
-    document.getElementById('st-cmts').textContent='0';
-    document.getElementById('cmt-cnt').textContent='0 SIGNALS';
-    return;
-  }
-  try{
-    const res=await Promise.all(posts.map(p=>af(`/api/posts/${p.id}/comments`).then(r=>r.json()).then(cs=>cs.map(c=>({...c,_ptitle:p.title})))));
-    const all=res.flat().sort((a,b)=>new Date(b.date)-new Date(a.date));
-    document.getElementById('st-cmts').textContent=all.length;
-    document.getElementById('cmt-cnt').textContent=`${all.length} SIGNAL${all.length!==1?'S':''}`;
-    if(!all.length){document.getElementById('cmts-list').innerHTML='<div style="font-family:var(--mono);font-size:.55rem;letter-spacing:.18em;color:rgba(255,255,255,.1);padding:28px 0;text-align:center">NO COMMENTS YET</div>';return;}
-    document.getElementById('cmts-list').innerHTML=all.slice(0,60).map(c=>`
-      <div class="cmt">
-        <div class="cmt-meta">
-          <span class="cmt-auth">${esc(c.name||'ANONYMOUS')}</span>
-          <span class="cmt-post">ON: ${esc(c._ptitle||`#${c.post_id}`)}</span>
-          <span class="cmt-date">${c.date?new Date(c.date).toLocaleString():'—'}</span>
-        </div>
-        <div class="cmt-txt">${esc(c.content)}</div>
-      </div>`).join('');
-  }catch(e){if(e.message!=='401')toast('Failed to load comments','err');}
+toast("Post created","ok")
+
+loadPosts()
+
 }
 
+document.getElementById("refresh-btn").onclick=loadPosts
 
-const bodyEl=document.getElementById('f-body');
-bodyEl.addEventListener('input',()=>{document.getElementById('cc').textContent=bodyEl.value.length;});
-document.getElementById('clear-btn').addEventListener('click',()=>{
-  ['f-title','f-auth','f-exc','f-body'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('f-cat').selectedIndex=0;
-  document.getElementById('cc').textContent='0';
-  document.getElementById('fst').textContent='';
-});
-document.getElementById('create-btn').addEventListener('click',async()=>{
-  const btn=document.getElementById('create-btn'),fst=document.getElementById('fst');
-  const title=document.getElementById('f-title').value.trim();
-  const category=document.getElementById('f-cat').value;
-  const author=document.getElementById('f-auth').value.trim()||'STAFF';
-  const excerpt=document.getElementById('f-exc').value.trim();
-  const content=bodyEl.value.trim();
-  if(!title){fst.textContent='TITLE REQUIRED';fst.className='fst err';return;}
-  if(!content){fst.textContent='CONTENT REQUIRED';fst.className='fst err';return;}
-  btn.disabled=true;btn.textContent='◌ TRANSMITTING…';fst.textContent='';fst.className='fst';
-  try{
-    const r=await af('/api/posts',{method:'POST',body:JSON.stringify({title,category,author,excerpt,content})});
-    const d=await r.json();
-    if(r.ok){
-      fst.textContent=`POST #${d.id||'?'} TRANSMITTED`;fst.className='fst ok';
-      toast('Post created!','ok');
-      document.getElementById('clear-btn').click();
-      await loadPosts();
-    }else{fst.textContent=d.error||'FAILED';fst.className='fst err';toast(d.error||'Failed','err');}
-  }catch(e){if(e.message!=='401'){fst.textContent='NETWORK ERROR';fst.className='fst err';toast('Network error','err');}}
-  finally{btn.disabled=false;btn.textContent='TRANSMIT POST';}
-});
+document.getElementById("logout").onclick=()=>{
+sessionStorage.clear()
+location.href="login.html"
+}
 
+loadPosts()
 
-document.getElementById('logout').addEventListener('click',()=>{sessionStorage.clear();location.href='login.html';});
-document.getElementById('refresh-btn').addEventListener('click',async()=>{toast('Refreshing…','info');await loadPosts();await loadComments(allPosts);});
-
-
-(async()=>{
-  try{const r=await af('/api/auth/verify');if(!r.ok){sessionStorage.clear();location.href='login.html';return;}}
-  catch{}
-  await loadPosts();
-  await loadComments(allPosts);
-})();
-})();
 </script>
+
 </body>
 </html>
