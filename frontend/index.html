@@ -1,12 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Blog</title>
+
+<title>Journal</title>
+
+<style>
+
+body{
+background:#0f0f0f;
+color:white;
+font-family:system-ui;
+margin:0;
+overflow-x:hidden;
+}
+
+header{
+text-align:center;
+padding:60px;
+font-size:40px;
+letter-spacing:3px;
+}
+
+#posts{
+max-width:900px;
+margin:auto;
+}
+
+.post{
+background:#1b1b1b;
+padding:30px;
+margin:30px;
+border-radius:12px;
+opacity:0;
+transform:translateY(50px);
+transition:0.3s;
+}
+
+.post:hover{
+transform:scale(1.02);
+background:#242424;
+}
+
+.title{
+font-size:28px;
+margin-bottom:10px;
+}
+
+.content{
+opacity:0.85;
+line-height:1.6;
+}
+
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3"></script>
+
 </head>
 
 <body>
 
-<h1>Blog</h1>
+<header id="title">The Journal</header>
 
 <div id="posts"></div>
 
@@ -14,21 +67,46 @@
 
 async function loadPosts(){
 
-const res=await fetch("/api/posts")
-const posts=await res.json()
+const res = await fetch("/api/posts")
+const posts = await res.json()
 
-const div=document.getElementById("posts")
+const container = document.getElementById("posts")
 
-div.innerHTML=""
+container.innerHTML=""
 
 posts.forEach(p=>{
 
-div.innerHTML+=`
-<h2>${p.title}</h2>
-<p>${p.content}</p>
-<hr>
+const div=document.createElement("div")
+
+div.className="post"
+
+div.innerHTML=`
+<div class="title">${p.title}</div>
+<div class="content">${p.content}</div>
 `
 
+container.appendChild(div)
+
+})
+
+animatePosts()
+
+}
+
+function animatePosts(){
+
+gsap.from("#title",{
+y:-40,
+opacity:0,
+duration:1.2
+})
+
+gsap.to(".post",{
+opacity:1,
+y:0,
+stagger:0.15,
+duration:1,
+ease:"power3.out"
 })
 
 }
